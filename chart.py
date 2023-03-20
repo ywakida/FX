@@ -52,7 +52,7 @@ def update_chart_csv(folder_path, ticker, interval):
         if not chart_diff.empty:
             if len(chart_diff) > 1:  
                 
-                chart = pandas.concat([chart, chart_diff])
+                chart = pandas.concat([existed_chart, chart_diff])
                 chart = chart[~chart.index.duplicated(keep='last')] # 重複があれば最新で更新する
                 chart.sort_index(axis='index', ascending=True, inplace=True)
                 chart.dropna(how='all', inplace=True)
