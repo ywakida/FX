@@ -58,7 +58,7 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
                 
                 chart = pandas.concat([existed_chart, chart_diff])
                 chart = chart[~chart.index.duplicated(keep='last')] # 重複があれば最新で更新する
-                chart.sort_index(axis='index', ascending=True, inplace=True)
+                #chart.sort_index(axis='index', ascending=True, inplace=True)
                 chart.dropna(how='all', inplace=True)
                 
                 if is_save == True:  
