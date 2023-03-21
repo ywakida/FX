@@ -20,7 +20,7 @@ def update_chart_csv(folder_path, ticker, interval, is_save=True):
     if not os.path.exists(file_name):
         
         currency = yfinance.Ticker(f'{ticker}=X')
-        new_chart = currency.history(period="max", interval=interval, progress=False)
+        new_chart = currency.history(period="max", interval=interval)
         if not new_chart.empty: # 空データでない
             if len(new_chart) > 1: # ヘッダのみでない
                 if is_save == True:    
@@ -47,7 +47,7 @@ def update_chart_csv(folder_path, ticker, interval, is_save=True):
         chart_diff = pandas.DataFrame()
         currency = yfinance.Ticker(f'{ticker}=X')
         
-        chart_diff = currency.history(period=f'max', interval=interval, progress=False)            
+        chart_diff = currency.history(period=f'max', interval=interval)            
         chart_diff.index = pandas.to_datetime(chart_diff.index)
         
         chart_diff = chart_diff[:-1] # 末尾1行を削除
