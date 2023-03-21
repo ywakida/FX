@@ -52,8 +52,12 @@ jobs:
         if ! git diff --exit-code --quiet
         then
           git add *.csv
+          echo "commit"
           git commit -m "update chart" -a
+          echo "pull"
           git pull
+          echo "config"
           git config pull.rebase false
+          echo "push"
           git push origin main
         fi
