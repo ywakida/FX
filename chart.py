@@ -9,7 +9,7 @@ basepath = './'
 encode = 'utf-8'
 
 # [1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo]
-def update_chart_csv(folder_path, ticker, interval, is_save=True):
+def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
     """ チャートのCSVの作成
 
     Args:
@@ -20,7 +20,7 @@ def update_chart_csv(folder_path, ticker, interval, is_save=True):
     if not os.path.exists(file_name):
         
         currency = yfinance.Ticker(f'{ticker}=X')
-        new_chart = currency.history(period="max", interval=interval)
+        new_chart = currency.history(periods='max', interval=interval)
         if not new_chart.empty: # 空データでない
             if len(new_chart) > 1: # ヘッダのみでない
                 if is_save == True:    
@@ -47,10 +47,11 @@ def update_chart_csv(folder_path, ticker, interval, is_save=True):
         chart_diff = pandas.DataFrame()
         currency = yfinance.Ticker(f'{ticker}=X')
         
-        chart_diff = currency.history(period=f'max', interval=interval)            
-        #chart_diff.index = pandas.to_datetime(chart_diff.index)
-        
+        chart_diff = currency.history(period=period, interval=interval)            
+        chart_diff.index = pandas.to_datetime(chart_diff.index)
+        print(len(chart_diff))
         chart_diff = chart_diff[:-1] # 末尾1行を削除
+        
 
         if not chart_diff.empty:
             if len(chart_diff) > 1:  
@@ -59,14 +60,6 @@ def update_chart_csv(folder_path, ticker, interval, is_save=True):
                 chart = chart[~chart.index.duplicated(keep='last')] # 重複があれば最新で更新する
                 chart.sort_index(axis='index', ascending=True, inplace=True)
                 chart.dropna(how='all', inplace=True)
-                
-                print(chart.tail(10))
-                
-                # latest_date = chart.index[-1]                
-                # print(latest_date)
-                # print(latest_date.second)
-                # print(latest_date.minute)
-                
                 
                 if is_save == True:  
                     chart.to_csv(file_name, header=True) # 保存
@@ -78,14 +71,17 @@ def update_chart_csv(folder_path, ticker, interval, is_save=True):
 def task():
     folder = 'chart_csv'
     intervals = ['5m', '15m', '1h', '1d', '1wk']
+    periods = ['60d', '60d', '730d', 'max', 'max']
     currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'AUDJPY', 'NZDJPY', 'CADJPY', 'EURUSD', 'GBPUSD', 'AUDUSD', 'NZDUSD', 'CADUSD']
+    # intervals = ['5m']
+    # currencies = ['USDJPY']
     
     for currency in currencies:
         print(currency, ":")
         
-        for interval in intervals:
-            print(" - ", interval)
-            update_chart_csv(folder, currency, interval) 
+        for interval, period in zip(intervals, periods):
+            print(" - ", interval, ":", period)
+            update_chart_csv(folder, currency, interval, period, False) 
 
 
 if __name__ == "__main__":
