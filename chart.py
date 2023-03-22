@@ -30,6 +30,7 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
     else: 
         # csvファイルを読み取り、最新日付を取得する
         existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+        existed_chart.index = pandas.to_datetime(existed_chart.index, utc=True)
         
         print(existed_chart.index[-1].date())
         last_date = existed_chart.index[-1].date()
@@ -48,7 +49,7 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
         currency = yfinance.Ticker(f'{ticker}=X')
         
         chart_diff = currency.history(period=period, interval=interval)            
-        chart_diff.index = pandas.to_datetime(chart_diff.index)
+        chart_diff.index = pandas.to_datetime(chart_diff.index, utc=True)
         print(len(chart_diff))
         chart_diff = chart_diff[:-1] # 末尾1行を削除
         
