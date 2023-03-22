@@ -82,7 +82,7 @@ def task():
         
         for interval, period in zip(intervals, periods):
             print(" - ", interval, ":", period)
-            update_chart_csv(folder, currency, interval, period, False) 
+            update_chart_csv(folder, currency, interval, period, True) 
 
 
 if __name__ == "__main__":
