@@ -13,8 +13,10 @@ on:
   workflow_dispatch:
   
   schedule:
+  # everyday 21:00(UTC) = 6:00(JST)
+  - cron:  '0 21 * * *'
   # every saturday 3:00(UTC) = 12:00(JST)
-  - cron:  '0 3 * * 6'
+  # - cron:  '0 3 * * 6'
 
 jobs:
   csv_update:
