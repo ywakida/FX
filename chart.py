@@ -72,6 +72,7 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
         
         chart_diff = currency.history(period=period, interval=interval)            
         chart_diff.index = pandas.to_datetime(chart_diff.index, utc=True)
+        chart_diff = chart_diff[['Open', 'High', 'Low', 'Close']]
         print(len(chart_diff))
         chart_diff = chart_diff[:-1] # 末尾1行を削除
         
@@ -83,6 +84,7 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
                 chart = chart[~chart.index.duplicated(keep='last')] # 重複があれば最新で更新する
                 chart.sort_index(axis='index', ascending=True, inplace=True)
                 chart.dropna(how='all', inplace=True)
+                chart.index.name = 'Datetime'
                 
                 if is_save == True:  
                     chart.to_csv(file_name, header=True) # 保存
@@ -117,7 +119,6 @@ def add_index():
             
             file_name = f'{folder}/{currency}_{interval}.csv'
             if os.path.exists(file_name):
-            
                 existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
                 existed_chart.index = pandas.to_datetime(existed_chart.index, utc=True)
                 
@@ -125,6 +126,25 @@ def add_index():
                 print(existed_chart.index.name)
                 existed_chart.to_csv(file_name, header=True) 
             
+def remove_columns():
+    intervals = ['5m', '15m', '1h', '1d', '1wk']
+    currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'AUDJPY', 'NZDJPY', 'CADJPY', 'EURUSD', 'GBPUSD', 'AUDUSD', 'NZDUSD', 'CADUSD']
+    
+    for currency in currencies:
+        print(currency, ":")
+        
+        for interval in intervals:
+            print(" - ", interval)
+            
+            file_name = f'{folder}/{currency}_{interval}.csv'
+            if os.path.exists(file_name):
+                existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+                existed_chart.index = pandas.to_datetime(existed_chart.index, utc=True)
+                
+                existed_chart = existed_chart[['Open', 'High', 'Low', 'Close']]
+                existed_chart.to_csv(file_name, header=True) 
+                
+
 
 def task2():
     intervals = ['1m', '5m', '15m', '1h']
@@ -150,8 +170,8 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
     
-    # task()
-    add_index()
+    task()
+    # remove_columns()
     # task2()
         
 
