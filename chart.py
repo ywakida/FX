@@ -7,7 +7,24 @@ import yfinance
 # gdrivepath = '/content/drive/My Drive/stock/' # for google drive
 basepath = './'
 encode = 'utf-8'
+folder = 'ohlc'
 
+def get_chart(ticker, interval, period):
+    
+    file_name = f'{folder}/{ticker}_{interval}.csv'
+    
+    if not os.path.exists(file_name):
+        return
+    
+    # existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+    
+    print('test')
+    currency = yfinance.Ticker(f'{ticker}=X')
+    chart_diff = currency.history(period=period, interval=interval)    
+    
+    print(chart_diff)
+    
+        
 # [1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo]
 def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
     """ チャートのCSVの作成
@@ -70,7 +87,6 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
             print(f'{file_name} is incorrect.')
         
 def task():
-    folder = 'chart_csv'
     intervals = ['5m', '15m', '1h', '1d', '1wk']
     periods = ['60d', '60d', '730d', 'max', 'max']
     currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'AUDJPY', 'NZDJPY', 'CADJPY', 'EURUSD', 'GBPUSD', 'AUDUSD', 'NZDUSD', 'CADUSD']
@@ -84,6 +100,20 @@ def task():
             print(" - ", interval, ":", period)
             update_chart_csv(folder, currency, interval, period, True) 
 
+def task2():
+    intervals = ['1m', '5m', '15m', '1h']
+    periods = ['7d', '60d', '60d', '730d']
+    currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'EURUSD', 'GBPUSD']
+    intervals = ['1m']
+    periods = ['1d']
+    currencies = ['USDJPY']
+    
+    for currency in currencies:
+        print(currency, ":")
+        
+        for interval, period in zip(intervals, periods):
+            print(" - ", interval, ":", period)
+            get_chart(currency, interval, period)
 
 if __name__ == "__main__":
     
@@ -94,7 +124,9 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
     
-    task()
+    # task()
+    
+    task2()
         
 
  
