@@ -45,7 +45,8 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
         if not new_chart.empty: # 空データでない
             if len(new_chart) > 1: # ヘッダのみでない
                 if is_save == True:
-                    new_chart.index.name = 'Datetime'
+                    new_chart.index.name = 'Datetime' # インデックスラベル名を作成
+                    new_chart = new_chart[['Open', 'High', 'Low', 'Close']] # 不要な列を削除する
                     new_chart.to_csv(file_name, header=True) # 保存
                     print(f'{file_name} is created.')       
     
@@ -54,11 +55,12 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
         existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
         existed_chart.index = pandas.to_datetime(existed_chart.index, utc=True)
         
-        print(existed_chart.index[-1].date())
+        # print(existed_chart.head(10))
+        print("recorded last date: ", existed_chart.index[-1].date())
         last_date = existed_chart.index[-1].date()
         # csvファイルの最新日付の翌日から本日までのデータを取得する
         today = datetime.date.today()
-        print(today)
+        print("today's date: ", today)
         delta_date = today - last_date
         delta_days = delta_date.days
         
@@ -69,11 +71,11 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
         
         chart_diff = pandas.DataFrame()
         currency = yfinance.Ticker(f'{ticker}=X')
-        
         chart_diff = currency.history(period=period, interval=interval)            
         chart_diff.index = pandas.to_datetime(chart_diff.index, utc=True)
-        chart_diff = chart_diff[['Open', 'High', 'Low', 'Close']]
-        print(len(chart_diff))
+        chart_diff = chart_diff[['Open', 'High', 'Low', 'Close']] # 不要な列を削除する
+        chart_diff.index.name = 'Datetime' # インデックスラベル名を作成
+        print("update length: ", len(chart_diff))
         chart_diff = chart_diff[:-1] # 末尾1行を削除
         
 
@@ -84,7 +86,8 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
                 chart = chart[~chart.index.duplicated(keep='last')] # 重複があれば最新で更新する
                 chart.sort_index(axis='index', ascending=True, inplace=True)
                 chart.dropna(how='all', inplace=True)
-                chart.index.name = 'Datetime'
+                # print(chart.head(10))
+                chart.index.name = 'Datetime' # インデックスラベル名を作成
                 
                 if is_save == True:  
                     chart.to_csv(file_name, header=True) # 保存
