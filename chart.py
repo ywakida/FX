@@ -16,13 +16,17 @@ def get_chart(ticker, interval, period):
     if not os.path.exists(file_name):
         return
     
-    # existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+    existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
     
-    print('test')
-    currency = yfinance.Ticker(f'{ticker}=X')
-    chart_diff = currency.history(period=period, interval=interval)    
+    # chart = exsited_chart[]
+    print(existed_chart.tail(100))
     
-    print(chart_diff)
+    
+    # print('test')
+    # currency = yfinance.Ticker(f'{ticker}=X')
+    # chart_diff = currency.history(period=period, interval=interval)    
+    
+    # print(chart_diff)
     
         
 # [1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo]
@@ -40,7 +44,8 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
         new_chart = currency.history(periods='max', interval=interval)
         if not new_chart.empty: # 空データでない
             if len(new_chart) > 1: # ヘッダのみでない
-                if is_save == True:    
+                if is_save == True:
+                    new_chart.index.name = 'Datetime'
                     new_chart.to_csv(file_name, header=True) # 保存
                     print(f'{file_name} is created.')       
     
@@ -99,12 +104,33 @@ def task():
         for interval, period in zip(intervals, periods):
             print(" - ", interval, ":", period)
             update_chart_csv(folder, currency, interval, period, True) 
+            
+def add_index():
+    intervals = ['5m', '15m', '1h', '1d', '1wk']
+    currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'AUDJPY', 'NZDJPY', 'CADJPY', 'EURUSD', 'GBPUSD', 'AUDUSD', 'NZDUSD', 'CADUSD']
+    
+    for currency in currencies:
+        print(currency, ":")
+        
+        for interval in intervals:
+            print(" - ", interval)
+            
+            file_name = f'{folder}/{currency}_{interval}.csv'
+            if os.path.exists(file_name):
+            
+                existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+                existed_chart.index = pandas.to_datetime(existed_chart.index, utc=True)
+                
+                existed_chart.index.name = 'Datetime'
+                print(existed_chart.index.name)
+                existed_chart.to_csv(file_name, header=True) 
+            
 
 def task2():
     intervals = ['1m', '5m', '15m', '1h']
     periods = ['7d', '60d', '60d', '730d']
     currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'EURUSD', 'GBPUSD']
-    intervals = ['1m']
+    intervals = ['5m']
     periods = ['1d']
     currencies = ['USDJPY']
     
@@ -125,8 +151,8 @@ if __name__ == "__main__":
     pandas.set_option('display.width', 1000)
     
     # task()
-    
-    task2()
+    add_index()
+    # task2()
         
 
  
