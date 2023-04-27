@@ -24,7 +24,9 @@ def get_chart(ticker, interval, period):
     # return existed_chart
     # print('test')
     currency = yfinance.Ticker(f'{ticker}=X')
-    chart_diff = currency.history(period=period, interval=interval)    
+    chart_diff = currency.history(period=period, interval=interval)
+    
+    return (chart_diff)
     
     print(chart_diff)
     
