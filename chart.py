@@ -16,17 +16,17 @@ def get_chart(ticker, interval, period):
     if not os.path.exists(file_name):
         return
     
-    existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+    # existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
     
     # chart = exsited_chart[]
-    print(existed_chart.tail(100))
+    # print(existed_chart.tail(100))
     
-    
+    # return existed_chart
     # print('test')
-    # currency = yfinance.Ticker(f'{ticker}=X')
-    # chart_diff = currency.history(period=period, interval=interval)    
+    currency = yfinance.Ticker(f'{ticker}=X')
+    chart_diff = currency.history(period=period, interval=interval)    
     
-    # print(chart_diff)
+    print(chart_diff)
     
         
 # [1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo]
@@ -96,7 +96,7 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
         else:
             print(f'{file_name} is incorrect.')
         
-def task():
+def save_ohlc():
     intervals = ['5m', '15m', '1h', '1d', '1wk']
     periods = ['60d', '60d', '730d', 'max', 'max']
     currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'AUDJPY', 'NZDJPY', 'CADJPY', 'EURUSD', 'GBPUSD', 'AUDUSD', 'NZDUSD', 'CADUSD']
@@ -173,9 +173,14 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
     
-    task()
+    # task()
     # remove_columns()
-    # task2()
+    
+    intervals = '5m'
+    periods = '1d'
+    currencies = 'USDJPY'
+    
+    get_chart(currencies, intervals, periods)
         
 
  
