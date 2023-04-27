@@ -59,6 +59,7 @@ jobs:
       run: |
         # update chart
         python chart.py
+        python -B -c "import chart; chart.save_ohlc()"
 
     - name: git update
       run: |
