@@ -2,34 +2,123 @@ import pandas
 import datetime
 import os
 import yfinance
+import time
 
 # コンフィグ
 # gdrivepath = '/content/drive/My Drive/stock/' # for google drive
 basepath = './'
 encode = 'utf-8'
 folder = 'ohlc'
+index_label = 'Datetime' # インデックスのラベル名
+support_intervals = ['5m', '15m', '1h', '1d', '1wk']
+support_periods = ['60d', '60d', '730d', 'max', 'max']
+support_currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'AUDJPY', 'NZDJPY', 'CADJPY', 'EURUSD', 'GBPUSD', 'AUDUSD', 'NZDUSD', 'CADUSD']
 
-def get_chart(ticker, interval, period):
+class FxOhlc():
     
-    file_name = f'{folder}/{ticker}_{interval}.csv'
+    def __init__(self, ticker, debug=False):
+        self.debug = debug
+        self.m5 = pandas.DataFrame()
+        self.m15 = pandas.DataFrame()
+        self.h1 = pandas.DataFrame()
+        
+        self.ticker = ''
+        if ticker in support_currencies:
+            self.ticker = ticker
+            
+            self.m5 = self.__load(self.ticker, '5m')
+            self.m15 = self.__load(self.ticker, '15m')
+        
+        else:
+            raise ValueError(ticker, ' is incorrected.')      
+        
+    def __load(self, ticker, interaval):
+        chart = pandas.DataFrame()
+        
+        file_name = f'{folder}/{ticker}_{interaval}.csv'
+        if os.path.exists(file_name):
+            chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+            chart.index = pandas.to_datetime(chart.index, utc=True)
+            chart.index.name = index_label # インデックスラベル名を作成
+            
+            if self.debug:
+                print(len(chart), ' row data is loaded.')
+                pass
+        else:
+            raise NameError(file_name, 'is not found.')
+        
+        return chart
+
+        
+    def __append_online_data(self, chart, interval):
+        
+        currency = yfinance.Ticker(f'{self.ticker}=X')
+        append_chart = currency.history(interval=interval, start=chart.index[-1].date())
+        # append_chart = currency.history(interval='5m', period='1d')
+        append_chart.index = pandas.to_datetime(append_chart.index, utc=True)
+        append_chart = append_chart[['Open', 'High', 'Low', 'Close']] # 不要な列を削除する
+        append_chart.index.name = index_label # インデックスラベル名を作成
+        append_chart = append_chart[:-1] # 末尾を削除
+                
+        if not append_chart.empty:
+            if len(append_chart) > 1:
+                chart = pandas.concat([chart, append_chart])
+                chart = chart[~chart.index.duplicated(keep='last')] # 重複があれば最新で更新する
+                chart.sort_index(axis='index', ascending=True, inplace=True)
+                chart.dropna(how='all', inplace=True)
+                chart.index.name = 'Datetime' # インデックスラベル名を作成
+
+        return chart
+
+    def append_online_data(self):
+        self.m5 = self.__append_online_data(self.m5, '5m')
+        self.m15 = self.__append_online_data(self.m15, '15m')
+        
+        
+def load_stored_data(ticker, interval):
+    """ 保存してあるデータをロードする
+    """
+    chart = pandas.DataFrame()
+    if ticker in support_currencies and interval in support_intervals:
+        file_name = f'{folder}/{ticker}_{interval}.csv'
+        if os.path.exists(file_name):
+            chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+            chart.index = pandas.to_datetime(chart.index, utc=True)
+            chart.index.name = index_label # インデックスラベル名を作成
+        else:
+            raise NameError(file_name, 'is not found.')
+    else:
+        raise ValueError('argument is incorrected.')
+        
+    return chart
+
+def get_online_data(ticker, interval, period):
     
-    if not os.path.exists(file_name):
-        return
+    chart = pandas.DataFrame()
+    if ticker in support_currencies and interval in support_intervals:# and period in support_periods:      
+        currency = yfinance.Ticker(f'{ticker}=X')
+        chart = currency.history(period=period, interval=interval)
+        chart.index = pandas.to_datetime(chart.index, utc=True)
+        chart = chart[['Open', 'High', 'Low', 'Close']] # 不要な列を削除する
+        chart.index.name = index_label # インデックスラベル名を作成
+    else:
+        raise ValueError('argument is incorrected.')
+
+    return chart
     
-    # existed_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+def append_online_data(chart, ticker, interval, period):
     
-    # chart = exsited_chart[]
-    # print(existed_chart.tail(100))
+    append_chart = get_online_data(ticker, interval, period)
     
-    # return existed_chart
-    # print('test')
-    currency = yfinance.Ticker(f'{ticker}=X')
-    chart_diff = currency.history(period=period, interval=interval)
-    
-    return (chart_diff)
-    
-    print(chart_diff)
-    
+    if not append_chart.empty:
+        if len(append_chart) > 1:
+            chart = pandas.concat([chart, append_chart])
+            chart = chart[~chart.index.duplicated(keep='last')] # 重複があれば最新で更新する
+            chart.sort_index(axis='index', ascending=True, inplace=True)
+            chart.dropna(how='all', inplace=True)
+            chart.index.name = 'Datetime' # インデックスラベル名を作成
+
+    return chart
         
 # [1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo]
 def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
@@ -164,7 +253,7 @@ def task2():
         
         for interval, period in zip(intervals, periods):
             print(" - ", interval, ":", period)
-            get_chart(currency, interval, period)
+            get_online_data(currency, interval, period)
 
 if __name__ == "__main__":
     
@@ -177,12 +266,43 @@ if __name__ == "__main__":
     
     # task()
     # remove_columns()
+
+    currency = 'USDJPY'    
+    interval = '5m'
+    period = '2d'
     
-    intervals = '5m'
-    periods = '1d'
-    currencies = 'USDJPY'
+    ohlc = FxOhlc(currency, True)
     
-    get_chart(currencies, intervals, periods)
+    print(ohlc.m15.index[-1])
+    
+    ohlc.append_online_data()
+
+    # time.sleep(10)
+    # print(ohlc.m15.index[-1])
+    # ohlc.append_online_data()
+
+    # time.sleep(10)
+    # print(ohlc.m15.index[-1])
+    # ohlc.append_online_data()
+    # time.sleep(10)
+    # print(ohlc.m15.index[-1])
+    # ohlc.append_online_data()
+    # time.sleep(10)
+    # print(ohlc.m15.index[-1])
+    # ohlc.append_online_data()
+    # time.sleep(10)
+    # print(ohlc.m15.index[-1])
+    # ohlc.append_online_data()
+    
+
+    
+    # chart = load_stored_data(currency, interval)
+    # chart = get_online_data(currency, interval, period)
+    # chart = chart.head(10)
+    # print(chart)
+    # chart = append_online_data(chart, currency, interval, '1d')
+    # print(chart)
+    
         
 
  

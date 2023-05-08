@@ -4,12 +4,73 @@ import math
 import os
 import numpy
 
+def add_sma(chart, params=[5, 20, 60]):
+    """ 単純移動平均線の追加
+    """
+    for param in params:
+        if not f'SMA{param}' in chart.columns:
+            chart[f'SMA{param}'] = chart['Close'].rolling(param).mean() 
+
+def add_sma_dr(chart, params=[5, 20, 60]):
+    """ 単純移動平均線からの乖離率(%)
+    """
+    for param in params:
+        if f'SMA{param}' in chart.columns:
+            chart[f'SMADR{param}']   = (chart['Close'] - chart[f'SMA{param}']) / chart[f'SMA{param}'] * 100
+        
+def add_sma_slope(chart, params=[20], base=1000):
+    """ シグマ
+    """     
+    for param in params:
+        chart[f'Slope{param}'] = chart[f'SMA{param}'].diff() * base
+            
+def add_ema(chart, params=[5, 20, 60]):
+    """ 指数移動平均線の追加
+    """
+    for param in params:
+        if not f'EMA{param}' in chart.columns:
+            chart[f'EMA{param}'] = chart['Close'].ewm(span=param, adjust=False).mean()
+    
+        
+def add_ema_dr(chart, params=[5, 20, 60]):
+    """ 指数移動平均線からの乖離率(%)
+    """
+    for param in params:
+        if f'EMA{param}' in chart.columns:
+            chart[f'EMADR{param}']   = (chart['Close'] - chart[f'EMA{param}']) / chart[f'EMA{param}'] * 100
+
+def add_ema_slope(chart, params=[20], base=1000):
+    """ シグマ
+    """     
+    for param in params:
+        chart[f'Slope{param}'] = chart[f'EMA{param}'].diff() * base
+        
+def add_bb(chart, params=[5, 20, 60]):
+    """ ボリンジャーバンド
+    """
+    for param in params:
+        chart[f'BB{param}P2'] = chart['Close'].rolling(param).mean() + 2 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
+        chart[f'BB{param}P1'] = chart['Close'].rolling(param).mean() + 1 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
+        chart[f'BB{param}M1'] = chart['Close'].rolling(param).mean() - 1 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
+        chart[f'BB{param}M2'] = chart['Close'].rolling(param).mean() - 2 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
+        
+def add_sigma(chart, params=[20]):
+    """ シグマ
+    """     
+    for param in params:
+        chart[f'SIGMA{param}'] = (chart['Close'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0)  # ddof = 0は母集団 
+        chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] >= 0), (chart['High'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
+        chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] < 0), (chart['Low'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
+        # chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].ewm(span=5, adjust=False).mean()
+        
+
+    
 def add_basic(chart, params=[5, 20, 60, 200]):
     """ 基本インジケータの追加
     """
     for param in params:
         # 単純移動平均 Simple moving average
-        chart[f'SMA{param}'] = chart['Close'].rolling(param).mean() # 5分足の短期移動平均
+        chart[f'SMA{param}'] = chart['Close'].rolling(param).mean()
         
         # 乖離率 Deviation rate
         chart[f'DR{param}']   = (chart['Close'] - chart[f'SMA{param}']) / chart[f'SMA{param}'] * 100
@@ -22,9 +83,7 @@ def add_basic(chart, params=[5, 20, 60, 200]):
         
         # 指数移動平均
         chart[f'EMA{param}'] = chart['Close'].ewm(span=param, adjust=False).mean()
-        
-        chart[f'Median{param}'] = chart['High'].rolling(param, center=True).median()
-        
+                
         # ボリンジャーバンド
         chart[f'BB{param}P2'] = chart['Close'].rolling(param).mean() + 2 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
         chart[f'BB{param}P1'] = chart['Close'].rolling(param).mean() + 1 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
