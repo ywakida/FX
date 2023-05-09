@@ -22,6 +22,10 @@ class FxOhlc():
         self.m5 = pandas.DataFrame()
         self.m15 = pandas.DataFrame()
         self.h1 = pandas.DataFrame()
+        self.m1_updated = False
+        self.m5_updated = False
+        self.m15_updated = False
+        self.h1_updated = False
         
         self.ticker = ''
         if ticker in support_currencies:
@@ -93,9 +97,38 @@ class FxOhlc():
     def append_online_data(self):
         """
         """
+        length_m1_1 = len(self.m1)
+        length_m5_1 = len(self.m5)
+        length_m15_1 = len(self.m15)
+        length_h1_1 = len(self.h1)
+        self.m1 = self.__append_online_data(self.m1, '1m')
         self.m5 = self.__append_online_data(self.m5, '5m')
         self.m15 = self.__append_online_data(self.m15, '15m')
-        
+        self.h1 = self.__append_online_data(self.h1, '1h')
+        length_m1_2 = len(self.m1)
+        length_m5_2 = len(self.m5)
+        length_m15_2 = len(self.m15)
+        length_h1_2 = len(self.h1)
+ 
+        if length_m1_1 == length_m1_2:
+            self.m1_updated = False
+        else:
+            self.m1_updated = True
+ 
+        if length_m5_1 == length_m5_2:
+            self.m5_updated = False
+        else:
+            self.m5_updated = True
+
+        if length_m15_1 == length_m15_2:
+            self.m15_updated = False
+        else:
+            self.m15_updated = True
+
+        if length_h1_1 == length_h1_2:
+            self.h1_updated = False
+        else:
+            self.h1_updated = True
         
 def load_stored_data(ticker, interval):
     """ 保存してあるデータをロードする
