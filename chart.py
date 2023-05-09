@@ -18,6 +18,7 @@ class FxOhlc():
     
     def __init__(self, ticker, debug=False):
         self.debug = debug
+        self.m1 = pandas.DataFrame()
         self.m5 = pandas.DataFrame()
         self.m15 = pandas.DataFrame()
         self.h1 = pandas.DataFrame()
@@ -26,18 +27,21 @@ class FxOhlc():
         if ticker in support_currencies:
             self.ticker = ticker
             
-            self.m5 = self.__load(self.ticker, '5m')
-            self.m15 = self.__load(self.ticker, '15m')
+            self.m1 = self.__get_online_data_for_period('1m', '7d')
+            self.m5 = self.__load('5m')
+            self.m15 = self.__load('15m')
+            self.h1 = self.__load('1h')
         
         else:
             raise ValueError(ticker, ' is incorrected.')      
         
-    def __load(self, ticker, interaval):
+    def __load(self, interaval):
         chart = pandas.DataFrame()
         
-        file_name = f'{folder}/{ticker}_{interaval}.csv'
+        file_name = f'{folder}/{self.ticker}_{interaval}.csv'
         if os.path.exists(file_name):
             chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+            chart.index = chart.index + datetime.timedelta(hours=9) # 日本時間に変更
             chart.index = pandas.to_datetime(chart.index, utc=True)
             chart.index.name = index_label # インデックスラベル名を作成
             
@@ -48,17 +52,33 @@ class FxOhlc():
             raise NameError(file_name, 'is not found.')
         
         return chart
-
+    
+    def __get_online_data_for_period(self, interval, period):
+        """
+        """
+        currency = yfinance.Ticker(f'{self.ticker}=X')
+        chart = currency.history(interval=interval, period=period)
+        chart.index = pandas.to_datetime(chart.index, utc=True) + datetime.timedelta(hours=9) # 日本時間に変更
+        chart = chart[['Open', 'High', 'Low', 'Close']] # 不要な列を削除する
+        chart.index.name = index_label # インデックスラベル名を作成
+        
+        return chart
+    
+    def __get_online_data_from_start(self, interval, start):
+        """
+        """        
+        currency = yfinance.Ticker(f'{self.ticker}=X')
+        chart = currency.history(interval=interval, start=start - datetime.timedelta(days=1))
+        chart.index = pandas.to_datetime(chart.index, utc=True) + datetime.timedelta(hours=9) # 日本時間に変更
+        chart = chart[['Open', 'High', 'Low', 'Close']] # 不要な列を削除する
+        chart.index.name = index_label # インデックスラベル名を作成
+        
+        return chart
         
     def __append_online_data(self, chart, interval):
-        
-        currency = yfinance.Ticker(f'{self.ticker}=X')
-        append_chart = currency.history(interval=interval, start=chart.index[-1].date())
-        # append_chart = currency.history(interval='5m', period='1d')
-        append_chart.index = pandas.to_datetime(append_chart.index, utc=True)
-        append_chart = append_chart[['Open', 'High', 'Low', 'Close']] # 不要な列を削除する
-        append_chart.index.name = index_label # インデックスラベル名を作成
-        append_chart = append_chart[:-1] # 末尾を削除
+        """
+        """        
+        append_chart = self.__get_online_data_from_start(interval, chart.index[-1].date())
                 
         if not append_chart.empty:
             if len(append_chart) > 1:
@@ -71,6 +91,8 @@ class FxOhlc():
         return chart
 
     def append_online_data(self):
+        """
+        """
         self.m5 = self.__append_online_data(self.m5, '5m')
         self.m15 = self.__append_online_data(self.m15, '15m')
         
@@ -273,9 +295,14 @@ if __name__ == "__main__":
     
     ohlc = FxOhlc(currency, True)
     
-    print(ohlc.m15.index[-1])
+    # print(ohlc.m15.index[-1])
     
     ohlc.append_online_data()
+    
+    print(ohlc.m1.tail(100))
+    print(ohlc.m5.tail(100))
+    print(ohlc.m15.tail(100))
+    print(ohlc.h1.tail(100))
 
     # time.sleep(10)
     # print(ohlc.m15.index[-1])
