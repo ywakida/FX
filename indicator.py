@@ -54,7 +54,7 @@ def add_ema_slope(chart, params=[20], base=1000):
     for param in params:
         chart[f'Slope{param}'] = chart[f'EMA{param}'].diff() * base
 
-    return chart        
+    return chart
 
 def add_bb(chart, params=[5, 20, 60]):
     """ ボリンジャーバンド
@@ -64,7 +64,9 @@ def add_bb(chart, params=[5, 20, 60]):
         chart[f'BB{param}P1'] = chart['Close'].rolling(param).mean() + 1 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
         chart[f'BB{param}M1'] = chart['Close'].rolling(param).mean() - 1 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
         chart[f'BB{param}M2'] = chart['Close'].rolling(param).mean() - 2 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
-        
+    
+    return chart
+
 def add_sigma(chart, params=[20]):
     """ シグマ
     """     
@@ -73,8 +75,8 @@ def add_sigma(chart, params=[20]):
         chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] >= 0), (chart['High'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
         chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] < 0), (chart['Low'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
         # chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].ewm(span=5, adjust=False).mean()
-        
-
+    
+    return chart 
     
 def add_basic(chart, params=[5, 20, 60, 200]):
     """ 基本インジケータの追加
@@ -124,7 +126,7 @@ def add_rci(chart, days=9):
     """        
     chart['Rci'] = chart['Close'].rolling(days).apply(calc_rci, raw=True)
 
-
+    return chart
 
 def add_heikinashi(chart):
     """平均足の追加
@@ -160,28 +162,19 @@ def add_heikinashi(chart):
     chart['HA_3V'] = 0
     chart['HA_3V'].mask((chart['HA_Close'] > chart['HA_Open']), 1, inplace=True)
     chart['HA_3V'].mask((chart['HA_Close'] < chart['HA_Open']), -1, inplace=True)
-    
-    width = 5
-    window=width * 2 + 1
-    chart[f'HA_SwingHigh'] = 0
-    chart[f'HA_SwingHigh'].mask((chart['HA_High'].rolling(window, center=True).max() == chart['HA_High']), chart['HA_High'], inplace=True)
-    chart[f'HA_SwingLow'] = 0
-    chart[f'HA_SwingLow'].mask((chart['HA_Low'].rolling(window, center=True).min() == chart['HA_Low']), chart['HA_Low'], inplace=True)
 
+    return chart
 
 def add_swing_high_low(chart, width=5):
     """スイングハイ、ローの検出
-
-    Args:
-        chart (_type_): _description_
-        width (int, optional): _description_. Defaults to 5.
     """
-    # 直近高値、直近安値の計算
     window=width * 2 + 1
     chart[f'SwingHigh'] = 0
     chart[f'SwingHigh'].mask((chart['High'].rolling(window, center=True).max() == chart['High']), chart['High'], inplace=True)
     chart[f'SwingLow'] = 0
     chart[f'SwingLow'].mask((chart['Low'].rolling(window, center=True).min() == chart['Low']), chart['Low'], inplace=True)
+
+    return chart
 
 def add_before(chart, day=1):
     """X日前の値
