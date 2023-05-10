@@ -10,6 +10,8 @@ def add_sma(chart, params=[5, 20, 60]):
     for param in params:
         if not f'SMA{param}' in chart.columns:
             chart[f'SMA{param}'] = chart['Close'].rolling(param).mean() 
+            
+    return chart
 
 def add_sma_dr(chart, params=[5, 20, 60]):
     """ 単純移動平均線からの乖離率(%)
@@ -17,12 +19,16 @@ def add_sma_dr(chart, params=[5, 20, 60]):
     for param in params:
         if f'SMA{param}' in chart.columns:
             chart[f'SMADR{param}']   = (chart['Close'] - chart[f'SMA{param}']) / chart[f'SMA{param}'] * 100
+            
+    return chart
         
 def add_sma_slope(chart, params=[20], base=1000):
     """ シグマ
     """     
     for param in params:
         chart[f'Slope{param}'] = chart[f'SMA{param}'].diff() * base
+    
+    return chart
             
 def add_ema(chart, params=[5, 20, 60]):
     """ 指数移動平均線の追加
@@ -31,6 +37,7 @@ def add_ema(chart, params=[5, 20, 60]):
         if not f'EMA{param}' in chart.columns:
             chart[f'EMA{param}'] = chart['Close'].ewm(span=param, adjust=False).mean()
     
+    return chart
         
 def add_ema_dr(chart, params=[5, 20, 60]):
     """ 指数移動平均線からの乖離率(%)
@@ -39,12 +46,16 @@ def add_ema_dr(chart, params=[5, 20, 60]):
         if f'EMA{param}' in chart.columns:
             chart[f'EMADR{param}']   = (chart['Close'] - chart[f'EMA{param}']) / chart[f'EMA{param}'] * 100
 
+    return chart
+
 def add_ema_slope(chart, params=[20], base=1000):
     """ シグマ
     """     
     for param in params:
         chart[f'Slope{param}'] = chart[f'EMA{param}'].diff() * base
-        
+
+    return chart        
+
 def add_bb(chart, params=[5, 20, 60]):
     """ ボリンジャーバンド
     """
