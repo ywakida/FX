@@ -54,19 +54,22 @@ def analyze():
         if ohlc.m1_updated:
             print (' ', ohlc.ticker, ':', '1minute', ' - ', ohlc.m1_updated)
             chart = ohlc.m1
-            indicator.add_sigma(chart, [20])
+            chart = indicator.add_sigma(chart, [20])
             chart = indicator.add_ema(chart, [5, 20, 60])
-            indicator.add_ema(chart, [4, 12]) # 1分足の中期(20)、長期(60)
-            indicator.add_ema(chart, [60, 180]) # 15分足の中期(20)、長期(60)
+            chart = indicator.add_ema(chart, [25, 100, 300]) # 5分足の短期、中期、長期
+            chart = indicator.add_ema(chart, [75, 300, 900]) # 15分足の短期、中期、長期
+            chart = indicator.add_swing_high_low(chart)
             
             print(chart.tail(10))
         
-        # ohlc_m5 = ohlc.m5
-        # ohlc_m15 = ohlc.m15
-        # indicator.add_sigma(ohlc_m5, [20])
-        # indicator.add_ema(ohlc_m5, [5, 20, 60])
-        # indicator.add_ema(ohlc_m5, [4, 12]) # 1分足の中期(20)、長期(60)
-        # indicator.add_ema(ohlc_m5, [60, 180]) # 15分足の中期(20)、長期(60)
+        if ohlc.m5_updated:
+            print (' ', ohlc.ticker, ':', '5minute', ' - ', ohlc.m5_updated)
+            chart = ohlc.m5
+            chart = indicator.add_sigma(chart, [20])
+            chart = indicator.add_ema(chart, [5, 20, 60])
+            chart = indicator.add_ema(chart, [4, 12]) # 1分足の中期、長期
+            chart = indicator.add_ema(chart, [15, 60, 180]) # 15分足の短期、中期、長期
+            chart = indicator.add_swing_high_low(chart)
         
         # latest_m5 = ohlc_m5.iloc[-1]
         # if (latest_m5['Close'] < latest_m5['EMA20']) and (latest_m5['Open'] > latest_m5['EMA20']):

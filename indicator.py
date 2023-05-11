@@ -190,6 +190,9 @@ def add_before(chart, day=1):
 
 
 
+
+
+
 def analize_sma(chart, currency):
     
     # トレンド転換の可能性のある5MA, 20MA, 60MA突き抜け
