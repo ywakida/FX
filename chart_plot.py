@@ -55,32 +55,42 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "L
     key = 'S'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='yellow', width=1)), row=row, col=col)
+        if f'EMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='yellow', width=1)), row=row, col=col)
 
     key = 'M'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='red', width=1)), row=row, col=col)
+        if f'EMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='red', width=1)), row=row, col=col)
  
         # ボリンジャーバンド
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P2'], name=f'{value} BB + 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P1'], name=f'{value} BB + 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M1'], name=f'{value} BB - 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M2'], name=f'{value} BB - 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if f'BB{value}P2' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P2'], name=f'{value} BB + 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if f'BB{value}P1' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P1'], name=f'{value} BB + 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if f'BB{value}M1' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M1'], name=f'{value} BB - 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if f'BB{value}M2' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M2'], name=f'{value} BB - 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
            
     key = 'L'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='lime', width=1)), row=row, col=col)
+        if f'EMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='lime', width=1)), row=row, col=col)
     
     key = 'LL'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='cyan', width=1)), row=row, col=col)
+        if f'SMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='cyan', width=1)), row=row, col=col)
   
     # スイングハイ・スイングロー
-    figure.add_trace(go.Scatter(x=chart[chart["SwingHigh"]>0].index, y=chart[chart["SwingHigh"]>0]["High"]*1.0001, name="高値", mode="markers", marker_symbol="triangle-down", marker_size=5, marker_color="white"), row=row, col=col)
-    figure.add_trace(go.Scatter(x=chart[chart["SwingLow"]>0].index, y=chart[chart["SwingLow"]>0]["Low"]*0.9999, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=row, col=col)
+    if f'SwingHigh' in chart.columns:
+        figure.add_trace(go.Scatter(x=chart[chart["SwingHigh"]>0].index, y=chart[chart["SwingHigh"]>0]["High"]*1.0001, name="高値", mode="markers", marker_symbol="triangle-down", marker_size=5, marker_color="white"), row=row, col=col)
+    if f'SwingLow' in chart.columns:
+        figure.add_trace(go.Scatter(x=chart[chart["SwingLow"]>0].index, y=chart[chart["SwingLow"]>0]["Low"]*0.9999, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=row, col=col)
     
     # 非表示にする日付(土日)をリストアップ
     d_all = pandas.date_range(start=chart.index[0],end=chart.index[-1]) # 日付リストを取得
@@ -113,7 +123,8 @@ def add_rci(figure, chart, row=1, col=1):
     # y軸名を定義
     figure.update_yaxes(title_text="rci", row=row, col=col)
     
-    figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Rci'], name=f'RCI', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
+    if f'Rci' in chart.columns:
+        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Rci'], name=f'RCI', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
     
     
     return figure
@@ -219,22 +230,26 @@ def add_deviationrate(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, 
     key = 'S'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'DR{value}'], name=f'{value} DR', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
+        if f'DR{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'DR{value}'], name=f'{value} DR', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
 
     key = 'M'
     if keys.get(key) != None:
-        value = keys.get(key)   
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'DR{value}'], name=f'{value} DR', mode="lines", line=dict(color='red', width=2)), row=row, col=col)
+        value = keys.get(key) 
+        if f'DR{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'DR{value}'], name=f'{value} DR', mode="lines", line=dict(color='red', width=2)), row=row, col=col)
            
     key = 'L'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'DR{value}'], name=f'{value} DR', mode="lines", line=dict(color='lime', width=2)), row=row, col=col)
+        if f'DR{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'DR{value}'], name=f'{value} DR', mode="lines", line=dict(color='lime', width=2)), row=row, col=col)
     
     key = 'LL'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'DR{value}'], name=f'{value} DR', mode="lines", line=dict(color='cyan', width=2)), row=row, col=col)
+        if f'DR{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'DR{value}'], name=f'{value} DR', mode="lines", line=dict(color='cyan', width=2)), row=row, col=col)
       
     return figure
 
@@ -261,17 +276,20 @@ def add_sigma(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200
     key = 'M'
     if keys.get(key) != None:
         value = keys.get(key)   
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SIGMA{value}'], name=f'{value} SIGMA', mode="lines", line=dict(color='red', width=2)), row=row, col=col)
+        if f'SIGMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SIGMA{value}'], name=f'{value} SIGMA', mode="lines", line=dict(color='red', width=2)), row=row, col=col)
            
     key = 'L'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SIGMA{value}'], name=f'{value} SIGMA', mode="lines", line=dict(color='lime', width=2)), row=row, col=col)
+        if f'SIGMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SIGMA{value}'], name=f'{value} SIGMA', mode="lines", line=dict(color='lime', width=2)), row=row, col=col)
     
     key = 'LL'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SIGMA{value}'], name=f'{value} SIGMA', mode="lines", line=dict(color='cyan', width=2)), row=row, col=col)
+        if f'SIGMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SIGMA{value}'], name=f'{value} SIGMA', mode="lines", line=dict(color='cyan', width=2)), row=row, col=col)
       
     return figure
 
@@ -293,22 +311,27 @@ def add_slope(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200
     key = 'S'
     if keys.get(key) != None:
         value = keys.get(key)
-        # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{key}'], name=f'{value} Slope', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
+        if f'Slope{value}' in chart.columns:     
+            # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{value}'], name=f'{value} Slope', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
+            pass
 
     key = 'M'
     if keys.get(key) != None:
-        value = keys.get(key)   
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{value}'], name=f'{value} Slope', mode="lines", line=dict(color='red', width=2)), row=row, col=col)
+        value = keys.get(key)
+        if f'Slope{value}' in chart.columns:     
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{value}'], name=f'{value} Slope', mode="lines", line=dict(color='red', width=2)), row=row, col=col)
            
     key = 'L'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{value}'], name=f'{value} Slope', mode="lines", line=dict(color='lime', width=2)), row=row, col=col)
+        if f'Slope{value}' in chart.columns:     
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{value}'], name=f'{value} Slope', mode="lines", line=dict(color='lime', width=2)), row=row, col=col)
     
     key = 'LL'
     if keys.get(key) != None:
         value = keys.get(key)
-        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{value}'], name=f'{value} Slope', mode="lines", line=dict(color='cyan', width=2)), row=row, col=col)
+        if f'Slope{value}' in chart.columns:     
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{value}'], name=f'{value} Slope', mode="lines", line=dict(color='cyan', width=2)), row=row, col=col)
       
     return figure
 
@@ -328,7 +351,7 @@ def plot_basicchart(filename, currency, chart, auto_open=False, keys={"S":5, "M"
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    fig = add_candlestick(fig, chart, 1, 1)
+    fig = add_candlestick(fig, chart, 1, 1, keys)
     
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
@@ -350,8 +373,8 @@ def plot_with_dr(filename, currency, chart, auto_open=False, keys={"S":5, "M":20
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    fig = add_candlestick(fig, chart, 1, 1)
-    fig = add_deviationrate(fig, chart, 2, 1)
+    fig = add_candlestick(fig, chart, 1, 1, keys)
+    fig = add_deviationrate(fig, chart, 2, 1, keys)
     
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
@@ -371,8 +394,8 @@ def plot_with_sigma(filename, currency, chart, auto_open=False, keys={"S":5, "M"
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    fig = add_candlestick(fig, chart, 1, 1)
-    fig = add_sigma(fig, chart, 2, 1)
+    fig = add_candlestick(fig, chart, 1, 1, keys)
+    fig = add_sigma(fig, chart, 2, 1, keys)
     
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
@@ -392,12 +415,33 @@ def plot_with_slope(filename, currency, chart, auto_open=False, keys={"S":5, "M"
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    fig = add_candlestick(fig, chart, 1, 1)
-    fig = add_slope(fig, chart, 2, 1)
+    fig = add_candlestick(fig, chart, 1, 1, keys)
+    fig = add_slope(fig, chart, 2, 1, keys)
     
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
 
+def plot_with_rci(filename, currency, chart, auto_open=False, keys={"S":5, "M":20, "L":60, "LL":200}):
+    """シグマとのプロット
+
+    Args:
+        filename (_type_): _description_
+        currency (_type_): _description_
+        chart (_type_): _description_
+        auto_open (bool, optional): _description_. Defaults to False.
+        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
+    """
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.7, 0.3], x_title="Date")
+    
+    # グラフの設定
+    fig = add_graphsetting(fig)
+    
+    fig = add_candlestick(fig, chart, 1, 1, keys)
+    fig = add_rci(fig, chart, 2, 1)
+    
+    # プロット
+    plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
+    
 def plot_with_heikinashi_candlestick(filename, currency, chart, auto_open=False, keys={"S":5, "M":20, "L":60, "LL":200}):
     """平均足チャートとのプロット
 

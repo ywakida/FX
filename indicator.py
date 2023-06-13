@@ -52,7 +52,8 @@ def add_ema_slope(chart, params=[20], base=1000):
     """ シグマ
     """     
     for param in params:
-        chart[f'Slope{param}'] = chart[f'EMA{param}'].diff() * base
+        if f'EMA{param}' in chart.columns:
+            chart[f'Slope{param}'] = chart[f'EMA{param}'].diff() * base
 
     return chart
 
@@ -165,15 +166,20 @@ def add_heikinashi(chart):
 
     return chart
 
-def add_swing_high_low(chart, width=5):
+def add_swing_high_low(chart, width=5, fill=False):
     """スイングハイ、ローの検出
     """
+    # 直近高値、直近安値の計算
     window=width * 2 + 1
-    chart[f'SwingHigh'] = 0
+    chart[f'SwingHigh'] = numpy.nan
     chart[f'SwingHigh'].mask((chart['High'].rolling(window, center=True).max() == chart['High']), chart['High'], inplace=True)
-    chart[f'SwingLow'] = 0
+    chart[f'SwingLow'] = numpy.nan
     chart[f'SwingLow'].mask((chart['Low'].rolling(window, center=True).min() == chart['Low']), chart['Low'], inplace=True)
 
+    if fill:
+        chart[f'SwingHigh'].fillna(method='ffill', inplace=True)
+        chart[f'SwingLow'].fillna(method='ffill', inplace=True)
+        
     return chart
 
 def add_before(chart, day=1):

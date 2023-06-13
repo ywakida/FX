@@ -14,6 +14,33 @@ support_intervals = ['5m', '15m', '1h', '1d', '1wk']
 support_periods = ['60d', '60d', '730d', 'max', 'max']
 support_currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'AUDJPY', 'NZDJPY', 'CADJPY', 'EURUSD', 'GBPUSD', 'AUDUSD', 'NZDUSD', 'CADUSD']
 
+class Ohlc():
+    def __init__(self, interval):
+        self.__updated = False
+        self.__ohlc = pandas.DataFrame()
+        self.__interval = interval
+        self.__updated = False
+
+    @property
+    def ohlc(self):
+        return self.__ohlc
+    
+    @ohlc.setter
+    def ohlc(self, ohlc):
+        if len(ohlc) > len(self.__ohlc):
+            self.__ohlc = ohlc
+            self.__updated = True
+        else:
+            self.__updated = False
+        
+    @property
+    def interval(self):
+        return self.__interval
+        
+    @property
+    def updated(self):
+        return self.__updated
+    
 class FxOhlc():
     
     def __init__(self, ticker, debug=False):
@@ -26,6 +53,10 @@ class FxOhlc():
         self.m5_updated = False
         self.m15_updated = False
         self.h1_updated = False
+
+        self.minute1 = Ohlc('1m')
+        self.minute5 = Ohlc('5m')
+        
         
         self.ticker = ''
         if ticker in support_currencies:
@@ -310,6 +341,13 @@ def task2():
             print(" - ", interval, ":", period)
             get_online_data(currency, interval, period)
 
+def SMA(arr: pandas.Series, n: int) -> pandas.Series:
+    """
+    Returns `n`-period simple moving average of array `arr`.
+    """
+    return pandas.Series(arr).rolling(n).mean()
+
+
 if __name__ == "__main__":
     
     os.system('cls')
@@ -332,10 +370,14 @@ if __name__ == "__main__":
     
     ohlc.append_online_data()
     
-    print(ohlc.m1.tail(100))
-    print(ohlc.m5.tail(100))
-    print(ohlc.m15.tail(100))
-    print(ohlc.h1.tail(100))
+    # print(ohlc.m1.tail(1000).Close)
+    # print(SMA(ohlc.m1.tail(1000)['Close'], 5))
+
+
+    # print(ohlc.m1.tail(100))
+    # print(ohlc.m5.tail(100))
+    # print(ohlc.m15.tail(100))
+    # print(ohlc.h1.tail(100))
 
     # time.sleep(10)
     # print(ohlc.m15.index[-1])
