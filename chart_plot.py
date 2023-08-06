@@ -2,13 +2,12 @@ import pandas
 import plotly.graph_objects as go
 import plotly.offline
 import plotly.io
+import kaleido
+
 from plotly.subplots import make_subplots
 
 def add_graphsetting(figure):
     """グラフの全体設定
-
-    Args:
-        figure (_type_): _description_
     """
     # 背景やグラフの色の設定
     figure.update_layout(plot_bgcolor="black", paper_bgcolor="grey") # グラフの背景と全体の背景の設定
@@ -24,13 +23,36 @@ def add_graphsetting(figure):
     figure.update_layout(legend=dict(bgcolor='gray', bordercolor='white', borderwidth=1)) # 背景色、枠の色、枠の太さ
     figure.update_layout(legend=dict(x=1.002, y=0.98))
 
-    
     # フォントの設定
     figure.update_layout(font=dict(size=10, color='white'))
     
+    return figure
+
+def remove_gap_datetime(figure, chart, min=1):
+    """空白(GAP)の時刻を除去する
+    """
+    
+    d_all = pandas.date_range(start=chart.index[0],end=chart.index[-1], freq=f'{min}T') # データ期間の完全な時系列を取得する
+            
+    d_obs = [d.strftime("%Y-%m-%d %H:%M:%S") for d in chart.index] #データの時系列を取得する
+        
+    d_breaks = [d for d in d_all.strftime("%Y-%m-%d %H:%M:%S").tolist() if not d in d_obs] # データに含まれていない時刻を抽出
+
+    figure.update_xaxes(rangebreaks=[dict(values=d_breaks, dvalue=1000*60*min)]) # dvalueはmsec
     
     return figure
+
     
+def remove_weekend(figure, chart):
+    """非表示にする日付(土日)をリストアップ
+    """
+    d_all = pandas.date_range(start=chart.index[0],end=chart.index[-1]) # 日付リストを取得
+    d_obs = [d.strftime("%Y-%m-%d") for d in chart.index] #株価データの日付リストを取得
+    d_breaks = [d for d in d_all.strftime("%Y-%m-%d").tolist() if not d in d_obs] # 株価データの日付データに含まれていない日付を抽出
+    figure.update_xaxes(rangebreaks=[dict(values=d_breaks)])
+
+    return figure
+
     
 def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """ろうそく足のプロット情報作成
@@ -92,12 +114,6 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "L
     if f'SwingLow' in chart.columns:
         figure.add_trace(go.Scatter(x=chart[chart["SwingLow"]>0].index, y=chart[chart["SwingLow"]>0]["Low"]*0.9999, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=row, col=col)
     
-    # 非表示にする日付(土日)をリストアップ
-    d_all = pandas.date_range(start=chart.index[0],end=chart.index[-1]) # 日付リストを取得
-    d_obs = [d.strftime("%Y-%m-%d") for d in chart.index] #株価データの日付リストを取得
-    d_breaks = [d for d in d_all.strftime("%Y-%m-%d").tolist() if not d in d_obs] # 株価データの日付データに含まれていない日付を抽出
-    figure.update_xaxes(rangebreaks=[dict(values=d_breaks)])
-    
     # スケーリング機能
     if row==1:
         figure.update_layout(xaxis1_rangeslider=dict(visible=False))
@@ -110,37 +126,18 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "L
 
 def add_rci(figure, chart, row=1, col=1):
     """平均足のプロット情報作成
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """   
     # y軸名を定義
     figure.update_yaxes(title_text="rci", row=row, col=col)
     
     if f'Rci' in chart.columns:
         figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Rci'], name=f'RCI', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
-    
-    
+
     return figure
     
     
 def add_heikinashi_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """平均足のプロット情報作成
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """   
     # y軸名を定義
     figure.update_yaxes(title_text="平均足", row=row, col=col)
@@ -214,16 +211,6 @@ def add_heikinashi_bar(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60,
 
 def add_deviationrate(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """乖離率の追加
-
-    Args:
-        figure (_type_): _description_
-        chart (_type_): _description_
-        row (int, optional): _description_. Defaults to 1.
-        col (int, optional): _description_. Defaults to 1.
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """
     figure.update_yaxes(title_text="乖離率", row=2, col=1)
     
@@ -255,16 +242,6 @@ def add_deviationrate(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, 
 
 def add_sigma(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """シグマの追加
-
-    Args:
-        figure (_type_): _description_
-        chart (_type_): _description_
-        row (int, optional): _description_. Defaults to 1.
-        col (int, optional): _description_. Defaults to 1.
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """
     figure.update_yaxes(title_text="シグマ", row=2, col=1)
     
@@ -295,16 +272,6 @@ def add_sigma(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200
 
 def add_slope(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """乖離率の追加
-
-    Args:
-        figure (_type_): _description_
-        chart (_type_): _description_
-        row (int, optional): _description_. Defaults to 1.
-        col (int, optional): _description_. Defaults to 1.
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """
     figure.update_yaxes(title_text="傾き", row=2, col=1)
     
@@ -336,15 +303,8 @@ def add_slope(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200
     return figure
 
 
-def plot_basicchart(filename, currency, chart, auto_open=False, keys={"S":5, "M":20, "L":60, "LL":200}):
+def plot_basicchart(filename, currency, chart, auto_open=False, min=5, keys={"S":5, "M":20, "L":60, "LL":200}):
     """ろうそく足のプロット
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        auto_open (bool, optional): _description_. Defaults to False.
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
     """
     fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[1.0], x_title="Date")
 
@@ -352,6 +312,8 @@ def plot_basicchart(filename, currency, chart, auto_open=False, keys={"S":5, "M"
     fig = add_graphsetting(fig)
     
     fig = add_candlestick(fig, chart, 1, 1, keys)
+    
+    fig = remove_gap_datetime(fig, chart, min)
     
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
@@ -417,9 +379,10 @@ def plot_with_slope(filename, currency, chart, auto_open=False, keys={"S":5, "M"
     
     fig = add_candlestick(fig, chart, 1, 1, keys)
     fig = add_slope(fig, chart, 2, 1, keys)
-    
+
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
+
 
 def plot_with_rci(filename, currency, chart, auto_open=False, keys={"S":5, "M":20, "L":60, "LL":200}):
     """シグマとのプロット
@@ -1149,6 +1112,7 @@ def plot_heikinashi(filename, currency, chart, auto_open=False):
     # fig.update(layout_xaxis_rangeslider=dict(visible=False))
     fig.update_layout(xaxis1_rangeslider=dict(visible=False))
     # fig.update_layout(xaxis2_rangeslider=dict(visible=False))
+    
     
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)

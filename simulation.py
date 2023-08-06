@@ -35,7 +35,8 @@ def analyze():
     
     print(datetime.datetime.now())
     # for ohlc in [ohlc_usdjpy, ohlc_eurjpy, ohlc_gbpjpy, ohlc_eurusd, ohlc_gbpusd]:
-    for ohlc in [ohlc_usdjpy, ohlc_eurjpy, ohlc_gbpjpy]:
+    # for ohlc in [ohlc_usdjpy, ohlc_eurjpy, ohlc_gbpjpy]:
+    for ohlc in [ohlc_usdjpy]:
 
         if ohlc.m1_updated == False:
             print (' ', ohlc.ticker, ':', '1minute', ' - ', ohlc.m1_updated)
@@ -51,7 +52,7 @@ def analyze():
             
  
             chart = chart.tail(1000)
-            chart_plot.plot_with_slope(f'{ohlc.ticker}_1minute.html', ohlc.ticker, chart)
+            chart_plot.plot_basicchart(f'html/{ohlc.ticker}_1minute.html', ohlc.ticker, chart, min=1)
         
         if ohlc.m5_updated == False:
             print (' ', ohlc.ticker, ':', '5minute', ' - ', ohlc.m5_updated)
@@ -61,25 +62,41 @@ def analyze():
             chart = indicator.add_ema(chart, [4, 12]) # 1分足の中期、長期
             chart = indicator.add_ema(chart, [15, 60, 180]) # 15分足の短期、中期、長期
             chart = indicator.add_swing_high_low(chart)
+            chart = indicator.add_ema_slope(chart, [5, 20, 60, 200])
             chart = indicator.add_bb(chart)
             chart = indicator.add_rci(chart)
         
+            chart = chart.tail(500)
+            chart_plot.plot_basicchart(f'html/{ohlc.ticker}_5minute.html', ohlc.ticker, chart, min=5)
+            
         if ohlc.m15_updated == False:
             print (' ', ohlc.ticker, ':', '15minute', ' - ', ohlc.m15_updated)
             chart = ohlc.m15
+            
             chart = indicator.add_ema(chart, [5, 20, 60])
             chart = indicator.add_ema(chart, [20, 80, 240]) # 1時間足の短期、中期、長期
             chart = indicator.add_ema(chart, [80, 320, 1160]) # 4時間足の短期、中期、長期
+            chart = indicator.add_swing_high_low(chart)
+            chart = indicator.add_ema_slope(chart, [5, 20, 60, 200])
             chart = indicator.add_bb(chart)
             chart = indicator.add_rci(chart)
             
+            chart = chart.tail(700)
+            chart_plot.plot_basicchart(f'html/{ohlc.ticker}_15minute.html', ohlc.ticker, chart, min=15)
+            
+            
         if ohlc.h1_updated == False:
             print (' ', ohlc.ticker, ':', '60minute', ' - ', ohlc.h1_updated)
-            chart = ohlc.m15
+            chart = ohlc.h1
             chart = indicator.add_ema(chart, [5, 20, 60])
             chart = indicator.add_ema(chart, [20, 80, 240]) # 4時間足の短期、中期、長期
+            chart = indicator.add_swing_high_low(chart)
+            chart = indicator.add_ema_slope(chart, [5, 20, 60, 200])
             chart = indicator.add_bb(chart)
             chart = indicator.add_rci(chart)
+            
+            chart = chart.tail(1000)
+            # chart_plot.plot_with_slope(f'html/{ohlc.ticker}_60minute.html', ohlc.ticker, chart, min=60)
             
         # latest_m5 = ohlc_m5.iloc[-1]
         # if (latest_m5['Close'] < latest_m5['EMA20']) and (latest_m5['Open'] > latest_m5['EMA20']):
@@ -112,7 +129,7 @@ if __name__ == "__main__":
     
     analyze()
 
-
+    # print(pandas.date_range('2023-07-01', '2023-07-31', freq='15T'))
  
  
             
