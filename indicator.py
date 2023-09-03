@@ -4,6 +4,15 @@ import math
 import os
 import numpy
 
+def add_oma(chart, params=[5, 20, 60]):
+    """ オリジナル移動平均線の追加
+    """
+    for param in params:
+        if not f'OMA{param}' in chart.columns:
+            chart[f'OMA{param}'] = ((chart['Close']+chart['Open'])/2).rolling(param).mean() 
+            
+    return chart
+
 def add_sma(chart, params=[5, 20, 60]):
     """ 単純移動平均線の追加
     """

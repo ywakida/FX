@@ -90,19 +90,6 @@ def analyze():
         
         # print(ohlc_m5.tail(10))
     
-    # ohlc_usdjpy.append_online_data()
-    # ohlc_eurjpy.append_online_data()
-    # ohlc_gbpjpy.append_online_data()
-    # ohlc_eurusd.append_online_data()
-    # ohlc_gbpusd.append_online_data()
-    
-    # chart_m5 = ohlc_usdjpy.m5
-    # indicator.add_sigma(chart_m5, [20])
-    # indicator.add_ema(chart_m5, [5, 20, 60])
-    # indicator.add_ema(chart_m5, [4, 12]) # 1分足の中期(20)、長期(60) 
-    # indicator.add_ema(chart_m5, [60, 180]) # 15分足の中期(20)、長期(60)
-    # print(chart_m5.tail(10))
-    
     
 if __name__ == "__main__":
     
