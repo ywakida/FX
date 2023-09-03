@@ -228,43 +228,14 @@ def add_deviationrate(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, 
     """
     figure.update_yaxes(title_text="乖離率", row=2, col=1)
     
-    key = 'S'
-    if keys.get(key) != None:
-        value = keys.get(key)
-        if f'EMADR{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMADR{value}'], name=f'{value} EMADR', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
-        elif f'SMADR{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMADR{value}'], name=f'{value} SMADR', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
-        else:
-            pass
-
-    key = 'M'
-    if keys.get(key) != None:
-        value = keys.get(key) 
-        if f'EMADR{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMADR{value}'], name=f'{value} EMADR', mode="lines", line=dict(color='red', width=2)), row=row, col=col)
-        elif f'SMADR{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMADR{value}'], name=f'{value} SMADR', mode="lines", line=dict(color='red', width=2)), row=row, col=col)
-        else:
-            pass
-           
-    key = 'L'
-    if keys.get(key) != None:
-        value = keys.get(key)
-        if f'EMADR{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMADR{value}'], name=f'{value} EMADR', mode="lines", line=dict(color='lime', width=2)), row=row, col=col)
-        elif f'SMADR{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMADR{value}'], name=f'{value} SMADR', mode="lines", line=dict(color='lime', width=2)), row=row, col=col)
-        else:
-            pass
+    colors={"S":"yellow", "M":"red", "L":"lime", "LL":"cyan"}
     
-    key = 'LL'
-    if keys.get(key) != None:
-        value = keys.get(key)
+    for key, value in keys.items():
+        thiscolor = colors.get(key)
         if f'EMADR{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMADR{value}'], name=f'{value} EMADR', mode="lines", line=dict(color='cyan', width=2)), row=row, col=col)
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMADR{value}'], name=f'{value} EMADR', mode="lines", line=dict(color=thiscolor, width=2)), row=row, col=col)
         elif f'SMADR{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMADR{value}'], name=f'{value} SMADR', mode="lines", line=dict(color='cyan', width=2)), row=row, col=col)
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMADR{value}'], name=f'{value} SMADR', mode="lines", line=dict(color=thiscolor, width=2)), row=row, col=col)
         else:
             pass
       
@@ -399,7 +370,7 @@ def plot_with_sigma(filename, currency, chart, auto_open=False, keys={"S":5, "M"
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
 
 def plot_with_slope(filename, currency, chart, auto_open=False, keys={"S":5, "M":20, "L":60, "LL":200}):
-    """シグマとのプロット
+    """スロープとのプロット
     """
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.7, 0.3], x_title="Date")
     
@@ -416,7 +387,7 @@ def plot_with_slope(filename, currency, chart, auto_open=False, keys={"S":5, "M"
 
 
 def plot_with_rci(filename, currency, chart, auto_open=False, keys={"S":5, "M":20, "L":60, "LL":200}):
-    """シグマとのプロット
+    """RCIとのプロット
     """
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.7, 0.3], x_title="Date")
     
@@ -1256,3 +1227,7 @@ if __name__ == "__main__":
     pandas.set_option('display.width', 1000)
     
     plot_test()
+
+    keys={"S":[5, "green"], "M":[20, "red"], "L":[60, "yellow"], "LL":[200, "lyme"]}
+    
+    
