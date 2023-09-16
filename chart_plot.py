@@ -567,13 +567,39 @@ def plot_test():
     for currency in currencies:
         for interval in intervals:
             file_name = f'ohlc/{currency}_{interval}.csv'
-            if os.path.exists(file_name):
                 
-                print(f'{file_name}')
+            print(f'{file_name}')
+            ohlc =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+            
+            # タイムゾーンをUTCから変更
+            ohlc.index = ohlc.index.tz_convert('Asia/Tokyo')
+            ohlc = indicator.add_sigma(ohlc, [20])
+            ohlc = indicator.add_ema(ohlc, [5, 20, 60])
+            ohlc = indicator.add_sma(ohlc, [200])
+            ohlc = indicator.add_ema(ohlc, [4, 12]) # 1分足の中期、長期
+            ohlc = indicator.add_ema(ohlc, [15, 60, 180]) # 15分足の短期、中期、長期
+            ohlc = indicator.add_swing_high_low(ohlc)
+            ohlc = indicator.add_ema_slope(ohlc, [5, 20, 60, 200])
+            ohlc = indicator.add_bb(ohlc)
+            ohlc = indicator.add_rci(ohlc)
+            ohlc = indicator.add_ema_dr(ohlc)
+            ohlc = indicator.add_oma(ohlc, [5, 20, 60, 200])
+            
+            # plot_basicchart_oma(f'html/{currency}_{interval}_oma.html', currency, ohlc.tail(1000), False)
+            plot_basicchart(f'html/{currency}_{interval}_basic.html', currency, ohlc.tail(4000), False)
+            plot_with_dr(f'html/{currency}_{interval}_with_dr.html', currency, ohlc.tail(4000), False)
+            plot_with_rci(f'html/{currency}_{interval}_with_rci.html', currency, ohlc.tail(4000), False)
+            plot_with_slope(f'html/{currency}_{interval}_with_slope.html', currency, ohlc.tail(4000), False)
+            
+            # print(ohlc['Close'].tail(30))
+            if interval=='1h':
+                # 4時間チャート作成
                 ohlc =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+                rule = '4h'
+                d_ohlc = {'Open':'first', 'High':'max', 'Low':'min', 'Close':'last'}
+                ohlc = ohlc.resample(rule).agg(d_ohlc)
+                ohlc = ohlc.dropna()
                 
-                # タイムゾーンをUTCから変更
-                ohlc.index = ohlc.index.tz_convert('Asia/Tokyo')
                 ohlc = indicator.add_sigma(ohlc, [20])
                 ohlc = indicator.add_ema(ohlc, [5, 20, 60])
                 ohlc = indicator.add_sma(ohlc, [200])
@@ -584,61 +610,34 @@ def plot_test():
                 ohlc = indicator.add_bb(ohlc)
                 ohlc = indicator.add_rci(ohlc)
                 ohlc = indicator.add_ema_dr(ohlc)
-                ohlc = indicator.add_oma(ohlc, [5, 20, 60, 200])
+                plot_basicchart(f'html/{currency}_{rule}_basic.html', currency, ohlc.tail(4000), False)
+                plot_with_dr(f'html/{currency}_{rule}_with_dr.html', currency, ohlc.tail(4000), False)
+                plot_with_rci(f'html/{currency}_{rule}_with_rci.html', currency, ohlc.tail(4000), False)
                 
-                # plot_basicchart_oma(f'html/{currency}_{interval}_oma.html', currency, ohlc.tail(1000), False)
-                plot_basicchart(f'html/{currency}_{interval}_basic.html', currency, ohlc.tail(4000), False)
-                plot_with_dr(f'html/{currency}_{interval}_with_dr.html', currency, ohlc.tail(4000), False)
-                plot_with_rci(f'html/{currency}_{interval}_with_rci.html', currency, ohlc.tail(4000), False)
-                plot_with_slope(f'html/{currency}_{interval}_with_slope.html', currency, ohlc.tail(4000), False)
+                # 日足チャート作成
+                ohlc =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+                # print(ohlc.tail(24))
+                ohlc.index = ohlc.index + pandas.DateOffset(hours=3)
+                # print(ohlc.tail(24))
                 
-                # print(ohlc['Close'].tail(30))
-                if interval=='1h':
-                    # 4時間チャート作成
-                    ohlc =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
-                    rule = '4h'
-                    d_ohlc = {'Open':'first', 'High':'max', 'Low':'min', 'Close':'last'}
-                    ohlc = ohlc.resample(rule).agg(d_ohlc)
-                    ohlc = ohlc.dropna()
+                rule = '1d'
+                d_ohlc = {'Open':'first', 'High':'max', 'Low':'min', 'Close':'last'}
+                ohlc = ohlc.resample(rule).agg(d_ohlc)
+                ohlc = ohlc.dropna()
                     
-                    ohlc = indicator.add_sigma(ohlc, [20])
-                    ohlc = indicator.add_ema(ohlc, [5, 20, 60])
-                    ohlc = indicator.add_sma(ohlc, [200])
-                    ohlc = indicator.add_ema(ohlc, [4, 12]) # 1分足の中期、長期
-                    ohlc = indicator.add_ema(ohlc, [15, 60, 180]) # 15分足の短期、中期、長期
-                    ohlc = indicator.add_swing_high_low(ohlc)
-                    ohlc = indicator.add_ema_slope(ohlc, [5, 20, 60, 200])
-                    ohlc = indicator.add_bb(ohlc)
-                    ohlc = indicator.add_rci(ohlc)
-                    ohlc = indicator.add_ema_dr(ohlc)
-                    plot_basicchart(f'html/{currency}_{rule}_basic.html', currency, ohlc.tail(4000), False)
-                    plot_with_dr(f'html/{currency}_{rule}_with_dr.html', currency, ohlc.tail(4000), False)
-                    plot_with_rci(f'html/{currency}_{rule}_with_rci.html', currency, ohlc.tail(4000), False)
-                    
-                    # 日足チャート作成
-                    ohlc =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
-                    # print(ohlc.tail(24))
-                    ohlc.index = ohlc.index + pandas.DateOffset(hours=3)
-                    # print(ohlc.tail(24))
-                    
-                    rule = '1d'
-                    d_ohlc = {'Open':'first', 'High':'max', 'Low':'min', 'Close':'last'}
-                    ohlc = ohlc.resample(rule).agg(d_ohlc)
-                    ohlc = ohlc.dropna()
-                        
-                    ohlc = indicator.add_sigma(ohlc, [20])
-                    ohlc = indicator.add_ema(ohlc, [5, 20, 60])
-                    ohlc = indicator.add_sma(ohlc, [200])
-                    ohlc = indicator.add_ema(ohlc, [4, 12]) # 1分足の中期、長期
-                    ohlc = indicator.add_ema(ohlc, [15, 60, 180]) # 15分足の短期、中期、長期
-                    ohlc = indicator.add_swing_high_low(ohlc)
-                    ohlc = indicator.add_ema_slope(ohlc, [5, 20, 60, 200])
-                    ohlc = indicator.add_bb(ohlc)
-                    ohlc = indicator.add_rci(ohlc)
-                    ohlc = indicator.add_ema_dr(ohlc)
-                    plot_basicchart(f'html/{currency}_{rule}_basic.html', currency, ohlc.tail(4000), False)
-                    plot_with_dr(f'html/{currency}_{rule}_with_dr.html', currency, ohlc.tail(4000), False)
-                    plot_with_rci(f'html/{currency}_{rule}_with_rci.html', currency, ohlc.tail(4000), False)
+                ohlc = indicator.add_sigma(ohlc, [20])
+                ohlc = indicator.add_ema(ohlc, [5, 20, 60])
+                ohlc = indicator.add_sma(ohlc, [200])
+                ohlc = indicator.add_ema(ohlc, [4, 12]) # 1分足の中期、長期
+                ohlc = indicator.add_ema(ohlc, [15, 60, 180]) # 15分足の短期、中期、長期
+                ohlc = indicator.add_swing_high_low(ohlc)
+                ohlc = indicator.add_ema_slope(ohlc, [5, 20, 60, 200])
+                ohlc = indicator.add_bb(ohlc)
+                ohlc = indicator.add_rci(ohlc)
+                ohlc = indicator.add_ema_dr(ohlc)
+                plot_basicchart(f'html/{currency}_{rule}_basic.html', currency, ohlc.tail(4000), False)
+                plot_with_dr(f'html/{currency}_{rule}_with_dr.html', currency, ohlc.tail(4000), False)
+                plot_with_rci(f'html/{currency}_{rule}_with_rci.html', currency, ohlc.tail(4000), False)
 
             else:
                 print(f"{file_name} is not exsisted.")
