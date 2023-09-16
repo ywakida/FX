@@ -121,41 +121,31 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "L
     # ろうそく足
     figure.add_trace(go.Candlestick(x=chart.index, open=chart['Open'], high=chart['High'], low=chart['Low'], close=chart['Close'], name='OHLC', increasing_line_width=1, increasing_line_color='red', increasing_fillcolor='red', decreasing_line_width=1, decreasing_line_color='lime', decreasing_fillcolor='lime'), row=row, col=col)
     
-    # SMA
-    key = 'S'
-    if keys.get(key) != None:
-        value = keys.get(key)
-        if f'EMA{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='yellow', width=1)), row=row, col=col)
+    matypes={"S":"EMA", "M":"EMA", "L":"EMA", "LL":"SMA"}
+    colors={"S":"yellow", "M":"red", "L":"lime", "LL":"cyan"}
+    for key, value in keys.items():
+        thismatype = matypes.get(key)
+        thiscolor = colors.get(key)
+        
+        if f'{thismatype}{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'{thismatype}{value}'], name=f'{value} {thismatype}', mode="lines", line=dict(color=thiscolor, width=2)), row=row, col=col)
 
-    key = 'M'
-    if keys.get(key) != None:
-        value = keys.get(key)
-        if f'EMA{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='red', width=1)), row=row, col=col)
+    # ボリンジャーバンド
+    if show_bollinger:
+        key = 'M'
+        if keys.get(key) != None:
+            value = keys.get(key)
  
-        # ボリンジャーバンド
-        if show_bollinger:
-            if f'BB{value}P2' in chart.columns:
-                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P2'], name=f'{value} BB + 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-            if f'BB{value}P1' in chart.columns:
-                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P1'], name=f'{value} BB + 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-            if f'BB{value}M1' in chart.columns:
-                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M1'], name=f'{value} BB - 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-            if f'BB{value}M2' in chart.columns:
-                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M2'], name=f'{value} BB - 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-           
-    key = 'L'
-    if keys.get(key) != None:
-        value = keys.get(key)
-        if f'EMA{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='lime', width=1)), row=row, col=col)
-    
-    key = 'LL'
-    if keys.get(key) != None:
-        value = keys.get(key)
-        if f'SMA{value}' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='cyan', width=1)), row=row, col=col)
+            if f'BB{value}P2' in chart.columns and f'BB{value}M2' in chart.columns:
+                # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P2'], name=f'{value} BB + 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+                # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M2'], name=f'{value} BB - 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P2'], name=f'', mode="lines", line=dict(color='lavender', width=0)), row=row, col=col)
+                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M2'], name=f'{value} BB ± 2', mode="lines", line=dict(color='lavender', width=0), fill="tonexty", fillcolor="rgba(170, 170, 170,.3)"), row=row, col=col)
+            if f'BB{value}P1' in chart.columns and f'BB{value}M1' in chart.columns:
+                # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P1'], name=f'{value} BB + 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+                # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M1'], name=f'{value} BB - 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P1'], name=f'', mode="lines", line=dict(color='lavender', width=0)), row=row, col=col)
+                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M1'], name=f'{value} BB ± 1', mode="lines", line=dict(color='lavender', width=0), fill="tonexty", fillcolor="rgba(170, 170, 170,.1)"), row=row, col=col)
   
     # スイングハイ・スイングロー
     if show_swing:
@@ -226,10 +216,9 @@ def add_heikinashi_bar(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60,
 def add_deviationrate(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """乖離率の追加
     """
+    figure.update_yaxes(title_text="乖離率", row=row, col=col)
+    
     colors={"S":"yellow", "M":"red", "L":"lime", "LL":"cyan"}
-    
-    figure.update_yaxes(title_text="乖離率", row=2, col=1)    
-    
     for key, value in keys.items():
         thiscolor = colors.get(key)
         if f'EMADR{value}' in chart.columns:
@@ -244,10 +233,9 @@ def add_deviationrate(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, 
 def add_sigma(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """シグマの追加
     """
+    figure.update_yaxes(title_text="シグマ", row=row, col=col)
+    
     colors={"S":"yellow", "M":"red", "L":"lime", "LL":"cyan"}
-    
-    figure.update_yaxes(title_text="シグマ", row=2, col=1)
-    
     for key, value in keys.items():
         thiscolor = colors.get(key)
         
@@ -259,10 +247,9 @@ def add_sigma(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200
 def add_slope(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """乖離率の追加
     """
+    figure.update_yaxes(title_text="傾き", row=row, col=col)
+    
     colors={"S":"yellow", "M":"red", "L":"lime", "LL":"cyan"}
-    
-    figure.update_yaxes(title_text="傾き", row=2, col=1)
-    
     for key, value in keys.items():
         thiscolor = colors.get(key)
         
