@@ -573,10 +573,10 @@ def plot_test():
             ohlc = indicator.add_oma(ohlc, [5, 20, 60, 200])
             
             # plot_basicchart_oma(f'html/{currency}_{interval}_oma.html', currency, ohlc.tail(1000), False)
-            plot_basicchart(f'html/{currency}_{interval}_basic.html', currency, ohlc.tail(4000), False)
-            plot_with_dr(f'html/{currency}_{interval}_with_dr.html', currency, ohlc.tail(4000), False)
-            plot_with_rci(f'html/{currency}_{interval}_with_rci.html', currency, ohlc.tail(4000), False)
-            plot_with_slope(f'html/{currency}_{interval}_with_slope.html', currency, ohlc.tail(4000), False)
+            plot_basicchart(f'html/{currency}_{interval}_basic.html', currency, ohlc.tail(2000), False)
+            # plot_with_dr(f'html/{currency}_{interval}_with_dr.html', currency, ohlc.tail(4000), False)
+            # plot_with_rci(f'html/{currency}_{interval}_with_rci.html', currency, ohlc.tail(4000), False)
+            # plot_with_slope(f'html/{currency}_{interval}_with_slope.html', currency, ohlc.tail(4000), False)
             
             # print(ohlc['Close'].tail(30))
             if interval=='1h':
@@ -626,8 +626,6 @@ def plot_test():
                 plot_with_dr(f'html/{currency}_{rule}_with_dr.html', currency, ohlc.tail(4000), False)
                 plot_with_rci(f'html/{currency}_{rule}_with_rci.html', currency, ohlc.tail(4000), False)
 
-            else:
-                print(f"{file_name} is not exsisted.")
             
 
 import os

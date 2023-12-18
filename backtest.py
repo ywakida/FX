@@ -32,6 +32,15 @@ def EMA(arr: pandas.Series, n: int) -> pandas.Series:
     """
     return pandas.Series(arr).ewm(span=n, adjust=False).mean()
 
+def RSI(arr: pandas.Series, n: int) -> pandas.Series:
+    """Relative strength index"""
+    # Approximate; good enough
+    gain = pandas.Series(arr).diff()
+    loss = gain.copy()
+    gain[gain < 0] = 0
+    loss[loss > 0] = 0
+    rs = gain.ewm(n).mean() / loss.abs().ewm(n).mean()
+    return 100 - 100 / (1 + rs)
 
 class myStrategy1(Strategy):
     """
@@ -65,20 +74,51 @@ class myStrategy(Strategy):
             if len(self.data) > self.orderd_bar + 10: # 買い注文から10行分経過した場合
                 self.position.close() # 現在の価格でポジションをクローズする
                 
-                
+
 class SmaCross(Strategy):
+    n1 = 5
+    n2 = 20
+    n3 = 60
+
+    def init(self):
+        self.smaS = self.I(SMA, self.data.Close, self.n1)
+        self.smaM = self.I(SMA, self.data.Close, self.n2)
+
+    def next(self):
+        if crossover(self.smaS, self.smaM):
+            self.buy()
+        elif crossover(self.smaM, self.smaS):
+            self.position.close()
+            
+                            
+class EmaCross(Strategy):
     n1 = 20
     n2 = 60
 
     def init(self):
-        self.sma1 = self.I(EMA, self.data.Close, self.n1)
-        self.sma2 = self.I(EMA, self.data.Close, self.n2)
+        self.smaM = self.I(EMA, self.data.Close, self.n1)
+        self.smaL = self.I(EMA, self.data.Close, self.n2)
 
     def next(self):
-        if crossover(self.sma1, self.sma2):
+        if crossover(self.smaM, self.smaL):
             self.buy()
-        elif crossover(self.sma2, self.sma1):
+        elif crossover(self.smaL, self.smaM):
             self.sell()
+            
+class RsiCross(Strategy):
+    ns = 14 # 短期
+    nl = 28 # 長期
+
+    def init(self):
+        self.rsiS = self.I(RSI, self.data.Close, self.ns)
+        self.rsiL = self.I(RSI, self.data.Close, self.nl)
+
+    def next(self):
+        if crossover(self.rsiS, self.rsiL):
+            self.buy()
+        elif crossover(self.rsiL, self.rsiS):
+            self.position.close()
+            
             
 
 def analyze():
@@ -91,18 +131,19 @@ def analyze():
     for ohlc in [ohlc_usdjpy]:
 
         print (' ', ohlc.ticker, ':', '15minute', ' - ', ohlc.m15_updated)
-        chart = ohlc.m15
+        chart = ohlc.h1
         
         bt = Backtest(
-            chart, # ヒストリカルデータ
-            SmaCross, # ストラテジー
+            chart.tail(300), # ヒストリカルデータ
+            RsiCross, # ストラテジー
             cash=10000, # 所持金
             commission=.002, # 取引手数料
             exclusive_orders=True # True:現在の終値で取引する、False:次の時間の始値で取引する
             )
         output = bt.run()
         print(output)
-        output._equity_curve["Equity"].plot()
+        # output._equity_curve["Equity"].plot()
+        bt.plot()
             
 if __name__ == "__main__":
     
