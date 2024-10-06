@@ -82,8 +82,8 @@ def add_sigma(chart, params=[20]):
     """     
     for param in params:
         chart[f'SIGMA{param}'] = (chart['Close'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0)  # ddof = 0は母集団 
-        chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] >= 0), (chart['High'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
-        chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] < 0), (chart['Low'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
+        chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] >= 0), (chart['High'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0))
+        chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] < 0), (chart['Low'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0))
         # chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].ewm(span=5, adjust=False).mean()
     
     return chart 
@@ -115,8 +115,8 @@ def add_basic(chart, params=[5, 20, 60, 200]):
         
         # 変則シグマ
         chart[f'SIGMA{param}'] = (chart['Close'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0)  # ddof = 0は母集団
-        chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] > 0), (chart['High'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
-        chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] < 0), (chart['Low'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
+        chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] > 0), (chart['High'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0))
+        chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] < 0), (chart['Low'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0))
         # chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].ewm(span=5, adjust=False).mean()
 
 
@@ -181,9 +181,9 @@ def add_swing_high_low(chart, width=5, fill=False):
     # 直近高値、直近安値の計算
     window=width * 2 + 1
     chart[f'SwingHigh'] = numpy.nan
-    chart[f'SwingHigh'].mask((chart['High'].rolling(window, center=True).max() == chart['High']), chart['High'], inplace=True)
+    chart[f'SwingHigh'] = chart[f'SwingHigh'].mask((chart['High'].rolling(window, center=True).max() == chart['High']), chart['High'])
     chart[f'SwingLow'] = numpy.nan
-    chart[f'SwingLow'].mask((chart['Low'].rolling(window, center=True).min() == chart['Low']), chart['Low'], inplace=True)
+    chart[f'SwingLow'] = chart[f'SwingLow'].mask((chart['Low'].rolling(window, center=True).min() == chart['Low']), chart['Low'])
 
     if fill:
         chart[f'SwingHigh'].fillna(method='ffill', inplace=True)

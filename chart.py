@@ -275,7 +275,7 @@ def update_chart_csv(folder_path, ticker, interval, period, is_save=True):
         
 def save_ohlc():
     intervals = ['5m', '15m', '1h', '1d', '1wk']
-    periods = ['60d', '60d', '730d', 'max', 'max']
+    periods = ['1mo', '1mo', '1y', 'max', 'max']
     currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'AUDJPY', 'NZDJPY', 'CADJPY', 'EURUSD', 'GBPUSD', 'AUDUSD', 'NZDUSD', 'CADUSD']
     # intervals = ['5m']
     # currencies = ['USDJPY']
@@ -365,10 +365,12 @@ if __name__ == "__main__":
     period = '2d'
     
     ohlc = FxOhlc(currency, True)
-    
+
+
+    save_ohlc()    
     # print(ohlc.m15.index[-1])
     
-    ohlc.append_online_data()
+    # ohlc.append_online_data()
     
     # print(ohlc.m1.tail(1000).Close)
     # print(SMA(ohlc.m1.tail(1000)['Close'], 5))

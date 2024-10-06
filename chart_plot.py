@@ -36,7 +36,7 @@ def remove_gap_datetime(figure, chart):
     if days==1:
         d_all = pandas.date_range(start=chart.index[0],end=chart.index[-1], freq='B') # 月から金のデータ期間の完全な時系列を取得する
     else:
-        d_all = pandas.date_range(start=chart.index[0],end=chart.index[-1], freq=f'{minutes}T') # データ期間の完全な時系列を取得する
+        d_all = pandas.date_range(start=chart.index[0],end=chart.index[-1], freq=f'{minutes}min') # データ期間の完全な時系列を取得する
         # for d in d_all:
         #     print(d)
         

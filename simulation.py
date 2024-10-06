@@ -52,7 +52,7 @@ def analyze():
             chart = indicator.add_ema_dr(chart)  
  
             chart = chart.tail(1000)
-            chart_plot.plot_with_dr(f'html/{ohlc.ticker}_1minute.html', ohlc.ticker, chart, min=1)
+            chart_plot.plot_with_dr(f'html/{ohlc.ticker}_1minute.html', ohlc.ticker, chart)
         
         if ohlc.m5_updated == False:
             print (' ', ohlc.ticker, ':', '5minute', ' - ', ohlc.m5_updated)
@@ -69,7 +69,7 @@ def analyze():
             
             chart = chart.tail(500)
             # chart_plot.plot_with_dr(f'html/{ohlc.ticker}_5minute.html', ohlc.ticker, chart, min=5)
-            chart_plot.plot_basicchart(f'html/{ohlc.ticker}_5minute.html', ohlc.ticker, chart, min=5)
+            chart_plot.plot_basicchart(f'html/{ohlc.ticker}_5minute.html', ohlc.ticker, chart)
             
         if ohlc.m15_updated == False:
             print (' ', ohlc.ticker, ':', '15minute', ' - ', ohlc.m15_updated)
@@ -85,14 +85,14 @@ def analyze():
             
             
             chart = chart.tail(700)
-            chart_plot.plot_for_simulation(f'html/{ohlc.ticker}_15minute.html', ohlc.ticker, chart, min=15)
+            chart_plot.plot_for_simulation(f'html/{ohlc.ticker}_15minute.html', ohlc.ticker, chart)
             
             
             
         if ohlc.h1_updated == False:
             print (' ', ohlc.ticker, ':', '60minute', ' - ', ohlc.h1_updated)
             chart = ohlc.h1
-            chart = indicator.add_ema(chart, [5, 20, 60])
+            chart = indicator.add_ema(chart,[5, 20, 60])
             chart = indicator.add_ema(chart, [20, 80, 240]) # 4時間足の短期、中期、長期
             chart = indicator.add_swing_high_low(chart)
             chart = indicator.add_ema_slope(chart, [5, 20, 60, 200])
@@ -101,7 +101,7 @@ def analyze():
             chart = indicator.add_ema_dr(chart)
             
             chart = chart.tail(1000)
-            chart_plot.plot_with_dr(f'html/{ohlc.ticker}_60minute.html', ohlc.ticker, chart, min=60)
+            chart_plot.plot_with_dr(f'html/{ohlc.ticker}_60minute.html', ohlc.ticker, chart)
             
         # latest_m5 = ohlc_m5.iloc[-1]
         # if (latest_m5['Close'] < latest_m5['EMA20']) and (latest_m5['Open'] > latest_m5['EMA20']):
