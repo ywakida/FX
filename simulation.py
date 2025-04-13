@@ -1,3 +1,5 @@
+""" 売買戦略に対する勝率のシミュレーションを行う
+"""
 import pandas
 import datetime
 import os
@@ -69,7 +71,7 @@ def analyze():
             
             chart = chart.tail(500)
             # chart_plot.plot_with_dr(f'html/{ohlc.ticker}_5minute.html', ohlc.ticker, chart, min=5)
-            chart_plot.plot_basicchart(f'html/{ohlc.ticker}_5minute.html', ohlc.ticker, chart)
+            chart_plot.plot_with_rci(f'html/{ohlc.ticker}_5minute.html', ohlc.ticker, chart)
             
         if ohlc.m15_updated == False:
             print (' ', ohlc.ticker, ':', '15minute', ' - ', ohlc.m15_updated)
@@ -83,9 +85,9 @@ def analyze():
             chart = indicator.add_rci(chart)
             chart = indicator.add_ema_dr(chart)
             
-            
             chart = chart.tail(700)
-            chart_plot.plot_for_simulation(f'html/{ohlc.ticker}_15minute.html', ohlc.ticker, chart)
+            # chart_plot.plot_for_simulation(f'html/{ohlc.ticker}_15minute.html', ohlc.ticker, chart)
+            chart_plot.plot_with_rci(f'html/{ohlc.ticker}_15minute.html', ohlc.ticker, chart)
             
             
             
@@ -100,14 +102,28 @@ def analyze():
             chart = indicator.add_rci(chart)
             chart = indicator.add_ema_dr(chart)
             
-            chart = chart.tail(1000)
-            chart_plot.plot_with_dr(f'html/{ohlc.ticker}_60minute.html', ohlc.ticker, chart)
+            chart = chart.tail(700)
+            chart_plot.plot_with_rci(f'html/{ohlc.ticker}_60minute.html', ohlc.ticker, chart)
             
-        # latest_m5 = ohlc_m5.iloc[-1]
-        # if (latest_m5['Close'] < latest_m5['EMA20']) and (latest_m5['Open'] > latest_m5['EMA20']):
-        #     print(ohlc.ticker, ': short')
-        
-        # print(ohlc_m5.tail(10))
+            # 4時間足にリサンプリング
+            ohlc_4h = ohlc.h1.resample('4h').agg({
+                'Open': 'first',
+                'High': 'max',
+                'Low': 'min',
+                'Close': 'last',
+            })
+            ohlc_4h = ohlc_4h.dropna(subset=['Open', 'High', 'Low', 'Close'])
+            
+            print(ohlc_4h.tail(400))
+            ohlc_4h = indicator.add_ema(ohlc_4h,[5, 20, 60])
+            ohlc_4h = indicator.add_swing_high_low(ohlc_4h)
+            ohlc_4h = indicator.add_bb(ohlc_4h)
+            ohlc_4h = indicator.add_rci(ohlc_4h)
+            ohlc_4h = indicator.add_ema_dr(ohlc_4h)
+            
+            ohlc_4h = ohlc_4h.tail(1000)
+            chart_plot.plot_with_rci(f'html/{ohlc.ticker}_240minute.html', ohlc.ticker, ohlc_4h)
+ 
     
     # ohlc_usdjpy.append_online_data()
     # ohlc_eurjpy.append_online_data()
@@ -122,7 +138,7 @@ def analyze():
     # indicator.add_ema(chart_m5, [60, 180]) # 15分足の中期(20)、長期(60)
     # print(chart_m5.tail(10))
     
-    
+import yfinance
 if __name__ == "__main__":
     
     os.system('cls')

@@ -47,14 +47,41 @@ def remove_gap_datetime(figure, chart):
     d_breaks = [d for d in d_all.strftime("%Y-%m-%d %H:%M:%S").tolist() if not d in d_obs] # データに含まれていない時刻を抽出
     # for d in d_breaks:
     #     print(d)
-    if min==0:
+    if minutes==0:
         figure.update_xaxes(rangebreaks=[dict(values=d_breaks)]) # dvalueはmsec    
     else:
         figure.update_xaxes(rangebreaks=[dict(values=d_breaks, dvalue=1000*60*minutes)]) # dvalueはmsec
     
     return figure
 
-    
+# def remove_gap_datetime(figure, chart):
+#     """
+#     Plotlyのfigureから、chartに存在しない時刻をrangebreaksで除外（空白を削除）
+#     chart: OHLCデータでDatetimeIndexを持つDataFrame（任意の時間足）
+#     """
+#     # 時間足（分単位）を自動検出
+#     time_delta = chart.index[1] - chart.index[0]
+#     minutes = int(time_delta.total_seconds() // 60)
+
+#     # 時系列全体の理論上の時間リストを作成（ここが重要）
+#     full_range = pandas.date_range(start=chart.index[0], end=chart.index[-1], freq=f"{minutes}min")
+
+#     # 存在しない時間だけを抽出（文字列として比較）
+#     existing_times = set(chart.index.strftime("%Y-%m-%d %H:%M:%S"))
+#     all_times = set(full_range.strftime("%Y-%m-%d %H:%M:%S"))
+#     missing_times = sorted(all_times - existing_times)
+
+#     # x軸の空白を削除（dvalue: 表示上の空白幅）
+#     if missing_times:
+#         figure.update_xaxes(
+#             rangebreaks=[
+#                 dict(values=missing_times, dvalue=1000 * 60 * minutes)
+#             ]
+#         )
+
+#     return figure
+
+
 def remove_weekend(figure, chart):
     """非表示にする日付(土日)をリストアップ
     """
