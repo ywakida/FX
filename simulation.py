@@ -114,7 +114,6 @@ def analyze():
             })
             ohlc_4h = ohlc_4h.dropna(subset=['Open', 'High', 'Low', 'Close'])
             
-            print(ohlc_4h.tail(400))
             ohlc_4h = indicator.add_ema(ohlc_4h,[5, 20, 60])
             ohlc_4h = indicator.add_swing_high_low(ohlc_4h)
             ohlc_4h = indicator.add_bb(ohlc_4h)
@@ -123,8 +122,23 @@ def analyze():
             
             ohlc_4h = ohlc_4h.tail(1000)
             chart_plot.plot_with_rci(f'html/{ohlc.ticker}_240minute.html', ohlc.ticker, ohlc_4h)
- 
-    
+
+        if ohlc.d1_updated == False:
+            print (' ', ohlc.ticker, ':', '1day', ' - ', ohlc.m15_updated)
+            chart = ohlc.d1
+            chart = indicator.add_ema(chart, [5, 20, 60])
+            chart = indicator.add_ema(chart, [20, 80, 240]) # 1時間足の短期、中期、長期
+            chart = indicator.add_ema(chart, [80, 320, 1160]) # 4時間足の短期、中期、長期
+            chart = indicator.add_swing_high_low(chart)
+            chart = indicator.add_ema_slope(chart, [5, 20, 60, 200])
+            chart = indicator.add_bb(chart)
+            chart = indicator.add_rci(chart)
+            chart = indicator.add_ema_dr(chart)
+            
+            chart = chart.tail(700)
+            # chart_plot.plot_for_simulation(f'html/{ohlc.ticker}_15minute.html', ohlc.ticker, chart)
+            chart_plot.plot_with_rci(f'html/{ohlc.ticker}_1day.html', ohlc.ticker, chart)
+                
     # ohlc_usdjpy.append_online_data()
     # ohlc_eurjpy.append_online_data()
     # ohlc_gbpjpy.append_online_data()

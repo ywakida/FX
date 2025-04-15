@@ -49,13 +49,15 @@ class FxOhlc():
         self.m5 = pandas.DataFrame()
         self.m15 = pandas.DataFrame()
         self.h1 = pandas.DataFrame()
+        self.d1 = pandas.DataFrame()
         self.m1_updated = False
         self.m5_updated = False
         self.m15_updated = False
         self.h1_updated = False
+        self.d1_updated = False
 
-        self.minute1 = Ohlc('1m')
-        self.minute5 = Ohlc('5m')
+        # self.minute1 = Ohlc('1m')
+        # self.minute5 = Ohlc('5m')
         
         
         self.ticker = ''
@@ -66,6 +68,7 @@ class FxOhlc():
             self.m5 = self.__load('5m')
             self.m15 = self.__load('15m')
             self.h1 = self.__load('1h')
+            self.d1 = self.__load('1d')
         
         else:
             raise ValueError(ticker, ' is incorrected.')      
@@ -132,14 +135,17 @@ class FxOhlc():
         length_m5_1 = len(self.m5)
         length_m15_1 = len(self.m15)
         length_h1_1 = len(self.h1)
+        length_d1_1 = len(self.d1)
         self.m1 = self.__append_online_data(self.m1, '1m')
         self.m5 = self.__append_online_data(self.m5, '5m')
         self.m15 = self.__append_online_data(self.m15, '15m')
         self.h1 = self.__append_online_data(self.h1, '1h')
+        self.d1 = self.__append_online_data(self.d1, '1d')
         length_m1_2 = len(self.m1)
         length_m5_2 = len(self.m5)
         length_m15_2 = len(self.m15)
         length_h1_2 = len(self.h1)
+        length_d1_2 = len(self.d1)
  
         if length_m1_1 == length_m1_2:
             self.m1_updated = False
@@ -160,7 +166,12 @@ class FxOhlc():
             self.h1_updated = False
         else:
             self.h1_updated = True
-        
+
+        if length_d1_1 == length_d1_2:
+            self.d1_updated = False
+        else:
+            self.d1_updated = True
+                    
 def load_stored_data(ticker, interval):
     """ 保存してあるデータをロードする
     """
